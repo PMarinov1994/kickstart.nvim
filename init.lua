@@ -692,7 +692,7 @@ require('lazy').setup({
           if buff_name:len() > 4 and buff_name:sub(-4) == '.xml' then
             vim.api.nvim_cmd({ cmd = 'Format' }, {})
           else
-            require('conform').format { async = true, lsp_fallback = true }
+            require('conform').format { async = true, lsp_format = 'fallback' }
           end
         end,
         mode = '',
@@ -908,7 +908,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'java' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
