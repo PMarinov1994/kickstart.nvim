@@ -9,11 +9,21 @@ return {
   dependencies = {
     {
       'https://github.com/microsoft/java-debug',
-      build = './mvnw clean install',
+      build = {
+        'touch /tmp/nvim_install.lock', -- create lock file
+        'flock /tmp/nvim_install.lock --command "./mvnw clean install"',
+      },
     },
     {
       'eclipse-jdtls/eclipse.jdt.ls',
-      build = './mvnw clean verify -DskipTests=true',
+      build = {
+        'touch /tmp/nvim_install.lock', -- create lock file
+        'flock /tmp/nvim_install.lock --command "./mvnw clean verify -DskipTests=true"',
+      },
+    },
+    {
+      'PMarinov1994/vscode-pde',
+      build = 'npm ci && npx gulp full_build',
     },
   },
   ft = { 'java' },
@@ -31,7 +41,7 @@ return {
       vim.fn.glob(lazy_dir .. '/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar', true),
     }
 
-    local vscode_pde_server_path = vim.fn.expand '~/.vscode/extensions/yaozheng.vscode-pde-*/server'
+    local vscode_pde_server_path = lazy_dir .. '/vscode-pde/server'
     local vscode_pde_server_jars = vim.split(vim.fn.glob(vscode_pde_server_path .. '/*.jar', true), '\n')
     vim.list_extend(bundles, vscode_pde_server_jars)
 
