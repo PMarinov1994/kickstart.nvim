@@ -145,14 +145,34 @@ return {
       extendedClientCapabilities = extendedClientCapabilities,
     }
 
+    --
+    -- Healper function
+    local existsInCWD = function(nameToCheck)
+      local cwdDir = vim.fn.getcwd()
+      -- Get all files and directories in CWD
+      local cwdContent = vim.split(vim.fn.glob(cwdDir .. '/*'), '\n', { trimempty = true })
+      local fullNameToCheck = cwdDir .. '/' .. nameToCheck
+      for _, cwdItem in pairs(cwdContent) do
+        if cwdItem == fullNameToCheck then
+          return true
+        end
+      end
+      return false
+    end
+
+    -- Start the server if the root folder contains javaConfig.json
+    -- This will speed up the loading of the target platform. Otherwise
+    -- we start the server when a Java file is opened.
+    if existsInCWD 'javaConfig.json' then
+      jdtls.start_or_attach(config)
+    end
+
     vim.api.nvim_create_autocmd('FileType', {
       pattern = 'java',
       callback = function()
         jdtls.start_or_attach(config)
       end,
     })
-
-    jdtls.start_or_attach(config)
   end,
 
   keys = function(_, keys)
