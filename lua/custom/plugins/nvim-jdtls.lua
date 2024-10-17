@@ -1,25 +1,147 @@
+local curr_dir = vim.fn.getcwd()
+
+local pickers = require 'telescope.pickers'
+local finders = require 'telescope.finders'
+local actions = require 'telescope.actions'
+local action_state = require 'telescope.actions.state'
+
+local project_name = vim.fn.fnamemodify(curr_dir, ':p:h:t')
+
+-- Healper function
+local existsInCWD = function(nameToCheck)
+  local cwdContent = vim.split(vim.fn.glob(curr_dir .. '/*'), '\n', { trimempty = true })
+  local fullNameToCheck = curr_dir .. '/' .. nameToCheck
+  for _, cwdItem in pairs(cwdContent) do
+    if cwdItem == fullNameToCheck then
+      return true
+    end
+  end
+  return false
+end
+
+-- a function that returns an array with changed items based on some function
+local map = function(tbl, f)
+  local t = {}
+  for k, v in pairs(tbl) do
+    t[k] = f(v)
+  end
+  return t
+end
+
+-- Based on the passed *.launch file
+-- 1. Start Debug Server
+-- 2. Extract launch parameters
+-- 3. Setup dap.configurations.java
+-- 4. Setup dap.adapters.java
+-- 5. TODO start the debug configuration
+local launch_debug = function(launch_file)
+  local util = require 'jdtls.util'
+
+  local status, dap = pcall(require, 'dap')
+  if not status then
+    print 'nvim-dap is not available'
+    return
+  end
+
+  dap.set_log_level 'TRACE'
+
+  util.execute_command({ command = 'vscode.java.startDebugSession' }, function(err, port)
+    assert(not err, vim.inspect(err))
+
+    util.execute_command({
+      command = 'java.pde.resolveLaunchArguments',
+      arguments = 'file:' .. curr_dir .. '/' .. launch_file,
+    }, function(laError, launchArgs)
+      assert(not laError, vim.inspect(laError))
+
+      local escapeStringsInList = function(item)
+        return '"' .. item .. '"'
+      end
+
+      -- TODO append to configuration instead of overriding
+      dap.configurations.java = {
+        {
+          type = 'java',
+          name = 'Debug Eclipse launch',
+          request = 'launch',
+
+          projectName = project_name,
+          mainClass = 'org.eclipse.equinox.launcher.Main',
+          classPaths = launchArgs.classpath,
+          vmArgs = table.concat(map(launchArgs.vmArguments, escapeStringsInList), ' '),
+          args = table.concat(map(launchArgs.programArguments, escapeStringsInList), ' '),
+        },
+      }
+
+      dap.adapters.java = {
+        type = 'server',
+        host = 'localhost',
+        port = port,
+      }
+
+      --
+      -- To view the log:
+      -- :lua print(vim.fn.stdpath('cache'))
+      -- The filename is `dap.log`
+      dap.run(dap.configurations.java[1], { new = true, filetype = 'java' })
+      --
+    end, nil) -- util.execute_command({
+  end, nil) -- util.execute_command({ command = 'vscode.java.startDebugSession' }, function(err, port)
+end -- local launch_debug = function(launch_file)
+
+local pick_launch = function()
+  pickers
+    .new({}, {
+      prompt_title = 'Path to executable',
+      finder = finders.new_oneshot_job({ 'rg', '--files', '--glob', '**.launch' }, {
+        cwd = curr_dir,
+      }),
+      attach_mappings = function(buffer_number)
+        actions.select_default:replace(function()
+          actions.close(buffer_number)
+          launch_debug(action_state.get_selected_entry()[1])
+        end)
+        return true
+      end,
+    })
+    :find()
+end -- local pick_launch = function(cwd)
+
+--
+local get_value_from_javaConfig = function(key)
+  local filePath = curr_dir .. '/javaConfig.json'
+  if not vim.uv.fs_stat(filePath) then
+    return nil
+  end
+
+  local lines = {}
+  for line in io.lines(filePath) do
+    if not vim.startswith(vim.trim(line), '//') then
+      table.insert(lines, line)
+    end
+  end
+  local jsonContent = table.concat(lines, '\n')
+
+  local ok, data = pcall(vim.json.decode, jsonContent)
+  if not ok then
+    error('Error parsing launch.json: ' .. data)
+  end
+
+  return data[key]
+end
+
 return {
   'mfussenegger/nvim-jdtls',
-  -- 'mfussenegger/nvim-dap',
-  -- 'nvim-lua/plenary.nvim',
-  -- {
-  -- 'https://gitlab.com/schrieveslaach/nvim-jdtls-bundles',
-  -- build = './install-bundles.py',
-  -- },
   dependencies = {
     {
-      'https://github.com/microsoft/java-debug',
-      build = {
-        'touch /tmp/nvim_install.lock', -- create lock file
-        'flock /tmp/nvim_install.lock --command "./mvnw clean install"',
-      },
+      'PMarinov1994/java-debug',
+      branch = 'snapshot_0.53.0',
+      build = './mvnw clean install',
     },
     {
-      'eclipse-jdtls/eclipse.jdt.ls',
-      build = {
-        'touch /tmp/nvim_install.lock', -- create lock file
-        'flock /tmp/nvim_install.lock --command "./mvnw clean verify -DskipTests=true"',
-      },
+      'PMarinov1994/eclipse.jdt.ls',
+      branch = 'snapshot_1.38.0',
+      build = './mvnw clean verify -DskipTests=true',
     },
     {
       'PMarinov1994/vscode-pde',
@@ -33,8 +155,6 @@ return {
 
     local extendedClientCapabilities = jdtls.extendedClientCapabilities
     extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-
-    local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 
     local lazy_dir = vim.fn.expand '~/.local/share/nvim/lazy'
     local bundles = {
@@ -93,7 +213,7 @@ return {
         -- 💀
         -- See `data directory configuration` section in the README
         '-data',
-        vim.fn.expand '~/.cache/jdtls/workspace' .. project_name,
+        vim.fn.expand '~/.cache/jdtls/workspace.' .. project_name,
       },
 
       -- 💀
@@ -122,13 +242,13 @@ return {
           references = {
             includeDecompiledSources = true,
           },
-          -- format = {
-          --   enabled = true,
-          --   settings = {
-          --     url = vim.fn.getcwd() .. '/code_style_formatter.xml',
-          --     profile = 'HilscherStyle',
-          --   },
-          -- },
+          format = {
+            enabled = true,
+            settings = {
+              url = vim.fn.expand '~/.config/nvim/java_formatter/code_style_formatter.xml',
+              -- profile = 'HilscherStyle',
+            },
+          },
         },
       },
 
@@ -145,26 +265,21 @@ return {
       extendedClientCapabilities = extendedClientCapabilities,
     }
 
-    --
-    -- Healper function
-    local existsInCWD = function(nameToCheck)
-      local cwdDir = vim.fn.getcwd()
-      -- Get all files and directories in CWD
-      local cwdContent = vim.split(vim.fn.glob(cwdDir .. '/*'), '\n', { trimempty = true })
-      local fullNameToCheck = cwdDir .. '/' .. nameToCheck
-      for _, cwdItem in pairs(cwdContent) do
-        if cwdItem == fullNameToCheck then
-          return true
-        end
-      end
-      return false
-    end
-
     -- Start the server if the root folder contains javaConfig.json
     -- This will speed up the loading of the target platform. Otherwise
     -- we start the server when a Java file is opened.
     if existsInCWD 'javaConfig.json' then
       jdtls.start_or_attach(config)
+    else
+      config.on_attach = function(client, bufnr)
+        jdtls.setup_dap {
+          -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
+          -- you make during a debug session immediately.
+          -- Remove the option if you do not want that.
+          hotcodereplace = 'auto',
+          config_overrides = {},
+        }
+      end
     end
 
     vim.api.nvim_create_autocmd('FileType', {
@@ -189,6 +304,18 @@ return {
           end, nil)
         end,
         desc = '[r]eload [t]arget [p]latform',
+      },
+      {
+        '<leader>dtp',
+        function()
+          local storedLaunch = get_value_from_javaConfig 'pde_launch'
+          if storedLaunch == nil then
+            pick_launch()
+          else
+            launch_debug(storedLaunch)
+          end -- if storedLaunch == nil then
+        end, -- function shortcut
+        desc = '[d]ebug [t]arget [p]latform',
       },
     }
   end,
