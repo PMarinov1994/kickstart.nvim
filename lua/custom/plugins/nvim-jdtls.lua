@@ -70,6 +70,7 @@ local launch_debug = function(launch_file)
           classPaths = launchArgs.classpath,
           vmArgs = table.concat(map(launchArgs.vmArguments, escapeStringsInList), ' '),
           args = table.concat(map(launchArgs.programArguments, escapeStringsInList), ' '),
+          env = launchArgs.environment,
         },
       }
 
