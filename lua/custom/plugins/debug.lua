@@ -129,6 +129,15 @@ return {
       -- log_console_level = vim.log.levels.ERROR, -- Logging level for output to console. Set to false to disable console output.
     }
 
+    -- PM
+    -- LLVM (Low Level Virtual Machine)
+    dap.adapters.codelldb = {
+      type = 'server',
+      port = '${port}',
+      executable = { command = 'codelldb', args = { '--port', '${port}' } },
+    }
+    -- PM
+
     ---@diagnostic enable: missing-fields
     for _, language in ipairs { 'typescript', 'javascript' } do
       require('dap').configurations[language] = {
