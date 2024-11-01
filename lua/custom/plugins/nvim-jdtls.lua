@@ -1,4 +1,5 @@
-local curr_dir = vim.fn.getcwd()
+-- local curr_dir = vim.fn.getcwd()
+local curr_dir = vim.fn.expand '%:p:h'
 
 local pickers = require 'telescope.pickers'
 local finders = require 'telescope.finders'
@@ -90,17 +91,17 @@ local launch_debug = function(launch_file)
   end, nil) -- util.execute_command({ command = 'vscode.java.startDebugSession' }, function(err, port)
 end -- local launch_debug = function(launch_file)
 
-local pick_launch = function()
+local pick_launch = function(title, filter, on_pick)
   pickers
     .new({}, {
-      prompt_title = 'Path to executable',
-      finder = finders.new_oneshot_job({ 'rg', '--files', '--glob', '**.launch' }, {
+      prompt_title = title,
+      finder = finders.new_oneshot_job({ 'rg', '--files', '--glob', filter }, {
         cwd = curr_dir,
       }),
       attach_mappings = function(buffer_number)
         actions.select_default:replace(function()
           actions.close(buffer_number)
-          launch_debug(action_state.get_selected_entry()[1])
+          on_pick(action_state.get_selected_entry()[1])
         end)
         return true
       end,
@@ -180,6 +181,7 @@ return {
     --  })
 
     local config = {
+      name = curr_dir,
       cmd = {
         -- 💀
         'java', -- or '/path/to/java17_or_newer/bin/java'
@@ -297,12 +299,14 @@ return {
       {
         '<leader>rtp',
         function()
-          util.execute_command({
-            command = 'java.pde.reloadTargetPlatform',
-            -- arguments = '/home/pmarinov/git/netx.studio.eclipse/Product/com.hilscher.netxstudio.target/com.hilscher.netxstudio.target.target',
-          }, function(err)
-            assert(not err, vim.inspect(err))
-          end, nil)
+          pick_launch('Path to target', '**.target', function(file)
+            util.execute_command({
+              command = 'java.pde.reloadTargetPlatform',
+              arguments = 'file://' .. curr_dir .. '/' .. file,
+            }, function(err)
+              assert(not err, vim.inspect(err))
+            end, nil)
+          end)
         end,
         desc = '[r]eload [t]arget [p]latform',
       },
@@ -311,7 +315,9 @@ return {
         function()
           local storedLaunch = get_value_from_javaConfig 'pde_launch'
           if storedLaunch == nil then
-            pick_launch()
+            pick_launch('Path to executable', '**.launch', function(file)
+              launch_debug(file)
+            end)
           else
             launch_debug(storedLaunch)
           end -- if storedLaunch == nil then
