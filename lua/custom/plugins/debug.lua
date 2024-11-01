@@ -84,6 +84,7 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'codelldb',
       },
     }
 
@@ -128,15 +129,6 @@ return {
       -- log_file_level = 0, -- Logging level for output to file. Set to false to disable file logging.
       -- log_console_level = vim.log.levels.ERROR, -- Logging level for output to console. Set to false to disable console output.
     }
-
-    -- PM
-    -- LLVM (Low Level Virtual Machine)
-    dap.adapters.codelldb = {
-      type = 'server',
-      port = '${port}',
-      executable = { command = 'codelldb', args = { '--port', '${port}' } },
-    }
-    -- PM
 
     ---@diagnostic enable: missing-fields
     for _, language in ipairs { 'typescript', 'javascript' } do

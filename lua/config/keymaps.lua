@@ -8,3 +8,5 @@ vim.api.nvim_set_keymap('i', '<C-U>', '<nop>', {})
 vim.api.nvim_set_keymap('v', '<leader>p', '"_dP', { noremap = true })
 --
 vim.api.nvim_set_keymap('n', '<leader>fy', ':let @+ = @%<cr>', { noremap = true })
+--
+vim.api.nvim_set_keymap('n', '<leader>vx', ':%!xxd<cr>', { noremap = true })
