@@ -711,7 +711,8 @@ require('lazy').setup({
         end
         return {
           timeout_ms = 500,
-          lsp_format = lsp_format_opt,
+          -- lsp_format = lsp_format_opt,
+          lsp_format = 'never',
         }
       end,
       formatters_by_ft = {
