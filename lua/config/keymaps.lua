@@ -10,3 +10,6 @@ vim.api.nvim_set_keymap('v', '<leader>p', '"_dP', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>fy', ':let @+ = @%<cr>', { noremap = true })
 --
 vim.api.nvim_set_keymap('n', '<leader>vx', ':%!xxd<cr>', { noremap = true })
+--
+vim.opt['tabstop'] = 4
+vim.opt['shiftwidth'] = 4
