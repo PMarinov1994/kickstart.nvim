@@ -7,6 +7,7 @@ local actions = require 'telescope.actions'
 local action_state = require 'telescope.actions.state'
 
 local project_name = vim.fn.fnamemodify(curr_dir, ':p:h:t')
+local workspace_folder = vim.fn.expand '~/.cache/jdtls/workspace.' .. project_name
 
 -- Healper function
 local existsInCWD = function(nameToCheck)
@@ -216,7 +217,7 @@ return {
         -- 💀
         -- See `data directory configuration` section in the README
         '-data',
-        vim.fn.expand '~/.cache/jdtls/workspace.' .. project_name,
+        workspace_folder,
       },
 
       -- 💀
@@ -323,6 +324,23 @@ return {
           end -- if storedLaunch == nil then
         end, -- function shortcut
         desc = '[d]ebug [t]arget [p]latform',
+      },
+      {
+        '<leader>cwf',
+        function()
+          local scan = require 'plenary.scandir'
+          scan.scan_dir(workspace_folder, {
+            hidden = false,
+            add_dirs = true,
+            depth = 1,
+            on_insert = function(file)
+              local clear_result = vim.fn.delete(file, 'rf')
+              assert(clear_result == 0, 'Failed to delete item: ' .. workspace_folder)
+              vim.notify('Deleted: ' .. file, vim.log.levels.INFO)
+            end,
+          })
+        end, -- function shortcut
+        desc = '[c]lear [w]orkspace [f]older',
       },
     }
   end,
