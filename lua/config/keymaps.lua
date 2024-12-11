@@ -13,4 +13,4 @@ vim.api.nvim_set_keymap('n', '<leader>vx', ':%!xxd<cr>', { noremap = true })
 --
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
-vim.opt.relativenumber = true
+-- vim.opt.relativenumber = true
