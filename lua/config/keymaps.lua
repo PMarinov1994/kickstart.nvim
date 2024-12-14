@@ -2,15 +2,33 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+local telescope_ext = require 'config.telescope-ext'
+
 -- Disable line detele at cursor
-vim.api.nvim_set_keymap('i', '<C-U>', '<nop>', {})
---
-vim.api.nvim_set_keymap('v', '<leader>p', '"_dP', { noremap = true })
---
-vim.api.nvim_set_keymap('n', '<leader>fy', ':let @+ = @%<cr>', { noremap = true })
---
-vim.api.nvim_set_keymap('n', '<leader>vx', ':%!xxd<cr>', { noremap = true })
---
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
--- vim.opt.relativenumber = true
+vim.keymap.set('i', '<C-U>', '<nop>', {})
+vim.keymap.set('v', '<leader>p', '"_dP', { noremap = true })
+vim.keymap.set('n', '<leader>fy', '<cmd>let @+ = @%<cr>', { noremap = true, desc = "Yank current buff's relative path" })
+vim.keymap.set('n', '<leader>fx', '<cmd>%!xxd<cr>', { noremap = true, desc = 'View current buff as hex' })
+vim.keymap.set('n', '<leader>ff', telescope_ext.live_multigrep, { desc = 'Grep from selected files' })
+
+vim.keymap.set('n', '<M-j>', '<cmd>cnext<CR>', { desc = 'Go to next Quick Fix line' })
+vim.keymap.set('n', '<M-k>', '<cmd>cprev<CR>', { desc = 'Go to prev Quick Fix line' })
+
+vim.keymap.set('n', '<Left>', ':vertical resize -2<CR>')
+vim.keymap.set('n', '<Right>', ':vertical resize +2<CR>')
+vim.keymap.set('n', '<Up>', ':resize +2<CR>')
+vim.keymap.set('n', '<Down>', ':resize -2<CR>')
+
+vim.keymap.set('n', '<leader>ft', function()
+  vim.cmd.vnew()
+  vim.cmd.term()
+  vim.cmd.wincmd 'J'
+  vim.api.nvim_win_set_height(0, 15)
+end, { desc = 'Open Terminal Split' })
+
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
+  callback = function()
+    vim.opt.number = false
+  end,
+})
