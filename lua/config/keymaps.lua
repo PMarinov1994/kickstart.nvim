@@ -3,6 +3,7 @@
 -- Add any additional keymaps here
 
 local telescope_ext = require 'config.telescope-ext'
+local floterminal = require 'config.floterminal'
 
 -- Disable line detele at cursor
 vim.keymap.set('i', '<C-U>', '<nop>', {})
@@ -19,16 +20,4 @@ vim.keymap.set('n', '<Right>', ':vertical resize +2<CR>')
 vim.keymap.set('n', '<Up>', ':resize +2<CR>')
 vim.keymap.set('n', '<Down>', ':resize -2<CR>')
 
-vim.keymap.set('n', '<leader>ft', function()
-  vim.cmd.vnew()
-  vim.cmd.term()
-  vim.cmd.wincmd 'J'
-  vim.api.nvim_win_set_height(0, 15)
-end, { desc = 'Open Terminal Split' })
-
-vim.api.nvim_create_autocmd('TermOpen', {
-  group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
-  callback = function()
-    vim.opt.number = false
-  end,
-})
+vim.keymap.set('n', '<leader>ft', floterminal.toggle_floterminal, { desc = 'Toggle floterminal' })
