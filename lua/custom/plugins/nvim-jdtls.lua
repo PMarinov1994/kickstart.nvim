@@ -138,7 +138,7 @@ return {
   dependencies = {
     {
       'PMarinov1994/java-debug',
-      branch = 'snapshot_0.53.0',
+      branch = 'snapshot_0.53.0-1',
       build = './mvnw clean install',
     },
     {
@@ -183,6 +183,16 @@ return {
 
     local config = {
       name = curr_dir,
+      on_attach = function(client, bufnr)
+        ---@diagnostic disable-next-line: missing-fields
+        jdtls.setup_dap {
+          -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
+          -- you make during a debug session immediately.
+          -- Remove the option if you do not want that.
+          hotcodereplace = 'auto',
+          -- config_overrides = {},
+        }
+      end,
       cmd = {
         -- 💀
         'java', -- or '/path/to/java17_or_newer/bin/java'
@@ -274,16 +284,6 @@ return {
     -- we start the server when a Java file is opened.
     if existsInCWD 'javaConfig.json' then
       jdtls.start_or_attach(config)
-    else
-      config.on_attach = function(client, bufnr)
-        jdtls.setup_dap {
-          -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
-          -- you make during a debug session immediately.
-          -- Remove the option if you do not want that.
-          hotcodereplace = 'auto',
-          config_overrides = {},
-        }
-      end
     end
 
     vim.api.nvim_create_autocmd('FileType', {
