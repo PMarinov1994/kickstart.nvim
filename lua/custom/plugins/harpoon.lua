@@ -12,13 +12,18 @@ return {
     vim.keymap.set('n', '<leader>a', function()
       harpoon:list():add()
       local buf = vim.api.nvim_get_current_buf()
-      vim.notify('Added file ' .. vim.api.nvim_buf_get_name(buf), vim.log.levels.INFO)
+      vim.notify('Harpoon add ' .. vim.api.nvim_buf_get_name(buf), vim.log.levels.INFO)
     end, { desc = 'Add buffer to harpoon' })
 
     vim.keymap.set('n', '<leader>r', function()
       harpoon:list():remove()
       local buf = vim.api.nvim_get_current_buf()
-      vim.notify('Removed file ' .. vim.api.nvim_buf_get_name(buf), vim.log.levels.INFO)
+      vim.notify('Harpoon remove ' .. vim.api.nvim_buf_get_name(buf), vim.log.levels.INFO)
+    end, { desc = 'Remove buffer to harpoon' })
+
+    vim.keymap.set('n', '<leader>r', function()
+      harpoon:list():clear()
+      vim.notify('Harpoon clear all', vim.log.levels.INFO)
     end, { desc = 'Remove buffer to harpoon' })
 
     -- Toggle previous & next buffers stored within Harpoon list
@@ -32,19 +37,35 @@ return {
     -- basic telescope configuration
     local conf = require('telescope.config').values
     local function toggle_telescope(harpoon_files)
-      local file_paths = {}
-      for _, item in ipairs(harpoon_files.items) do
-        table.insert(file_paths, item.value)
+      local make_finder = function()
+        local file_paths = {}
+        for _, item in pairs(harpoon_files.items) do
+          table.insert(file_paths, item.value)
+        end
+
+        return require('telescope.finders').new_table {
+          results = file_paths,
+        }
       end
 
       require('telescope.pickers')
         .new({}, {
           promt_title = 'Harpoon',
-          finder = require('telescope.finders').new_table {
-            results = file_paths,
-          },
+          finder = make_finder(),
           previewer = conf.file_previewer {},
           sorter = conf.generic_sorter {},
+          attach_mappings = function(prompt_buffer_number, map)
+            map('n', 'd', function()
+              local state = require 'telescope.actions.state'
+              local selected_entry = state.get_selected_entry()
+              local current_picker = state.get_current_picker(prompt_buffer_number)
+
+              harpoon:list():remove(selected_entry)
+              current_picker:refresh(make_finder())
+            end)
+
+            return true
+          end,
         })
         :find()
     end
