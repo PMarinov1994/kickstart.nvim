@@ -23,6 +23,14 @@ return {
 
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
+    'theHamsta/nvim-dap-virtual-text',
+    'mfussenegger/nvim-dap-python',
+
+    -- My debuggers
+    {
+      'microsoft/vscode-js-debug',
+      build = 'npm ci && npx gulp dapDebugServer && mv dist out',
+    },
   },
   keys = {
     -- Basic debugging keymaps, feel free to change to your liking!
@@ -76,6 +84,14 @@ return {
       end,
       desc = 'Debug: See last session result.',
     },
+    {
+      '<leader>k',
+      function()
+        ---@diagnostic disable-next-line: missing-fields
+        require('dapui').eval(nil, { enter = true })
+      end,
+      desc = 'Debug: Show variable under cursor value',
+    },
   },
   config = function()
     local dap = require 'dap'
@@ -95,11 +111,13 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'codelldb',
       },
     }
 
     -- Dap UI setup
     -- For more information, see |:help nvim-dap-ui|
+    ---@diagnostic disable: missing-fields
     dapui.setup {
       -- Set icons to characters that are more likely to work in every terminal.
       --    Feel free to remove or use ones that you like more! :)
@@ -144,5 +162,96 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
+
+    -- 💀 Make sure to update this path to point to your installation
+    local debugger_path = os.getenv 'HOME' .. '/.local/share/nvim/lazy/vscode-js-debug' -- Path to vscode-js-debug installation.
+
+    local vscode_launch_config_name = 'Launch VSCode Extension'
+    -- NOTE: This requires the nvim to be opened inside the checkout folder
+    -- i.e. 'nvim .' It will not work if you do 'nvim some/dir/path/source'
+    local curr_dir = vim.fn.getcwd()
+
+    dap.listeners.on_config['dap_vscode_launcher_hook'] = function(config)
+      if config.name == vscode_launch_config_name then
+        vim.system({
+          'code',
+          '--extensionDevelopmentPath=' .. curr_dir,
+          '--inspect-extensions',
+          '9229',
+        }, {
+          cwd = curr_dir,
+        })
+      end
+
+      return config
+    end
+
+    dap.adapters['pwa-node'] = {
+      type = 'server',
+      host = 'localhost',
+      port = 8123, -- default port for dapDebugServer
+      executable = {
+        command = 'node',
+        args = {
+          debugger_path .. '/out/src/dapDebugServer.js',
+        },
+      },
+    }
+
+    for _, language in ipairs { 'typescript', 'javascript' } do
+      require('dap').configurations[language] = {
+        {
+          type = 'pwa-node',
+          request = 'launch',
+          name = 'Launch TypeScript file (pwa-node)',
+          program = '${file}',
+          cwd = '${workspaceFolder}',
+          runtimeExecutable = 'npx',
+          runtimeArgs = { 'tsx' },
+        },
+        {
+          type = 'pwa-node',
+          request = 'launch',
+          name = 'Launch JavaScript file (pwa-node)',
+          program = '${file}',
+          cwd = '${workspaceFolder}',
+          sourceMaps = true,
+          skipFiles = { '<node_internals>/**' },
+        },
+        {
+          type = 'pwa-node',
+          request = 'attach',
+          name = vscode_launch_config_name,
+          cwd = '${workspaceFolder}',
+          sourceMaps = true,
+        },
+        {
+          type = 'pwa-node',
+          request = 'attach',
+          name = 'Attach',
+          processId = require('dap.utils').pick_process,
+          cwd = '${workspaceFolder}',
+        },
+        {
+          type = 'pwa-node',
+          request = 'launch',
+          name = 'Debug Jest Tests',
+          -- trace = true, -- include debugger info
+          runtimeExecutable = 'node',
+          runtimeArgs = {
+            './node_modules/jest/bin/jest.js',
+            '--runInBand',
+          },
+          rootPath = '${workspaceFolder}',
+          cwd = '${workspaceFolder}',
+          console = 'integratedTerminal',
+          internalConsoleOptions = 'neverOpen',
+        },
+      }
+    end
+
+    require('nvim-dap-virtual-text').setup()
+
+    require('dap-python').setup 'python3'
   end,
 }
