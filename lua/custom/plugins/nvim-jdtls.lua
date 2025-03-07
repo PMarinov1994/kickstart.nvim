@@ -30,6 +30,23 @@ local map = function(tbl, f)
   return t
 end
 
+local function pick_projects(callback)
+  local util = require 'jdtls.util'
+
+  util.execute_command({
+    command = 'java.project.getAll',
+  }, function(err, resp)
+    assert(not err, vim.inspect(err))
+
+    local projects = resp
+    if projects and projects[1] then
+      callback(vim.fn.fnamemodify(projects[1], ':h:t'))
+    else
+      callback(nil)
+    end
+  end)
+end
+
 -- Based on the passed *.launch file
 -- 1. Start Debug Server
 -- 2. Extract launch parameters
@@ -60,33 +77,36 @@ local launch_debug = function(launch_file)
         return '"' .. item .. '"'
       end
 
-      -- TODO append to configuration instead of overriding
-      dap.configurations.java = {
-        {
-          type = 'java',
-          name = 'Debug Eclipse launch',
-          request = 'launch',
+      pick_projects(function(projectName)
+        -- TODO append to configuration instead of overriding
+        dap.configurations.java = {
+          {
+            type = 'java',
+            name = 'Debug Eclipse launch',
+            request = 'launch',
 
-          projectName = project_name,
-          mainClass = 'org.eclipse.equinox.launcher.Main',
-          classPaths = launchArgs.classpath,
-          vmArgs = table.concat(map(launchArgs.vmArguments, escapeStringsInList), ' '),
-          args = table.concat(map(launchArgs.programArguments, escapeStringsInList), ' '),
-          env = launchArgs.environment,
-        },
-      }
+            projectName = projectName or project_name,
+            mainClass = 'org.eclipse.equinox.launcher.Main',
+            classPaths = launchArgs.classpath,
+            vmArgs = table.concat(map(launchArgs.vmArguments, escapeStringsInList), ' '),
+            args = table.concat(map(launchArgs.programArguments, escapeStringsInList), ' '),
+            env = launchArgs.environment,
+          },
+        }
 
-      dap.adapters.java = {
-        type = 'server',
-        host = 'localhost',
-        port = port,
-      }
+        dap.adapters.java = {
+          type = 'server',
+          host = 'localhost',
+          port = port,
+        }
 
-      --
-      -- To view the log:
-      -- :lua print(vim.fn.stdpath('cache'))
-      -- The filename is `dap.log`
-      dap.run(dap.configurations.java[1], { new = true, filetype = 'java' })
+        --
+        -- To view the log:
+        -- :lua print(vim.fn.stdpath('cache'))
+        -- The filename is `dap.log`
+        dap.run(dap.configurations.java[1], { new = true, filetype = 'java' })
+      end)
+
       --
     end, nil) -- util.execute_command({
   end, nil) -- util.execute_command({ command = 'vscode.java.startDebugSession' }, function(err, port)

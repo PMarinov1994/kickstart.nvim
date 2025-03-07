@@ -250,7 +250,9 @@ return {
       }
     end
 
-    require('nvim-dap-virtual-text').setup()
+    require('nvim-dap-virtual-text').setup {
+      enabled = false,
+    }
 
     require('dap-python').setup 'python3'
   end,
