@@ -14,6 +14,11 @@ return {
       desc = 'Diagnostics Errors Only (Trouble)',
     },
     {
+      '<leader>xw',
+      '<cmd>Trouble diagnostics toggle filter.severity=vim.diagnostic.severity.WARN<cr>',
+      desc = 'Diagnostics Warning Only (Trouble)',
+    },
+    {
       '<leader>xc',
       '<cmd>Trouble diagnostics toggle filter.buf=0<cr>',
       desc = 'Buffer Diagnostics (Trouble)',
