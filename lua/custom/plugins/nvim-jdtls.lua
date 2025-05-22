@@ -174,7 +174,6 @@ return {
   ft = { 'java' },
   config = function()
     local jdtls = require 'jdtls'
-    local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
     local extendedClientCapabilities = jdtls.extendedClientCapabilities
     extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
@@ -254,7 +253,6 @@ return {
       -- This is the default if not provided, you can remove it. Or adjust as needed.
       -- One dedicated LSP server & client will be started per unique root_dir
       root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew' }),
-      capabilities = capabilities,
 
       -- Here you can configure eclipse.jdt.ls specific settings
       -- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
