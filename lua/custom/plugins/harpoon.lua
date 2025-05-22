@@ -17,6 +17,7 @@ return {
 
     vim.keymap.set('n', '<leader>r', function()
       harpoon:list():remove()
+      harpoon:list():remove_empty_entries()
       local buf = vim.api.nvim_get_current_buf()
       vim.notify('Harpoon remove ' .. vim.api.nvim_buf_get_name(buf), vim.log.levels.INFO)
     end, { desc = 'Remove buffer to harpoon' })
@@ -61,6 +62,7 @@ return {
               local current_picker = state.get_current_picker(prompt_buffer_number)
 
               harpoon:list():remove(selected_entry)
+              harpoon:list():remove_empty_entries()
               current_picker:refresh(make_finder())
             end)
 
