@@ -12,7 +12,25 @@ return {
   -- NOTE: And you can specify dependencies as well
   dependencies = {
     -- Creates a beautiful debugger UI
-    'rcarriga/nvim-dap-ui',
+    {
+      'rcarriga/nvim-dap-ui',
+      build = function()
+        local patch_lua = os.getenv 'HOME' .. '/.local/share/nvim/lazy/nvim-dap-ui/lua/dapui/client/lib.lua'
+        local file = io.open(patch_lua, 'r')
+        if file then
+          local content = file:read '*a'
+          file:close()
+          -- Replace the target string
+          content = content:gsub(' or not vim%.uv%.fs_stat%(source%.path%) ', ' ')
+
+          file = io.open(patch_lua, 'w')
+          if file then
+            file:write(content)
+            file:close()
+          end
+        end
+      end,
+    },
 
     -- Required dependency for nvim-dap-ui
     'nvim-neotest/nvim-nio',
@@ -136,19 +154,38 @@ return {
           disconnect = '⏏',
         },
       },
+      select_window = function()
+        local windows = vim.tbl_filter(function(win)
+          if vim.api.nvim_win_get_config(win).relative ~= '' then
+            return false
+          end
+          local buf = vim.api.nvim_win_get_buf(win)
+          local lsps_attached = vim.lsp.get_clients {
+            bufnr = buf,
+          }
+
+          local buf_type = vim.api.nvim_get_option_value('buftype', {
+            buf = buf,
+          })
+
+          return buf_type == '' or #lsps_attached > 0
+        end, vim.api.nvim_tabpage_list_wins(0))
+
+        return windows[1]
+      end,
     }
 
     -- Change breakpoint icons
-    -- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
-    -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
-    -- local breakpoint_icons = vim.g.have_nerd_font
-    --     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
-    --   or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
-    -- for type, icon in pairs(breakpoint_icons) do
-    --   local tp = 'Dap' .. type
-    --   local hl = (type == 'Stopped') and 'DapStop' or 'DapBreak'
-    --   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
-    -- end
+    vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
+    vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
+    local breakpoint_icons = vim.g.have_nerd_font
+        and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
+      or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
+    for type, icon in pairs(breakpoint_icons) do
+      local tp = 'Dap' .. type
+      local hl = (type == 'Stopped') and 'DapStop' or 'DapBreak'
+      vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
+    end
 
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close

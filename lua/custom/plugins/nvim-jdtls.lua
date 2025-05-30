@@ -157,13 +157,11 @@ return {
   'mfussenegger/nvim-jdtls',
   dependencies = {
     {
-      'PMarinov1994/java-debug',
-      branch = 'snapshot_0.53.0-1',
+      'microsoft/java-debug',
       build = './mvnw clean install',
     },
     {
-      'PMarinov1994/eclipse.jdt.ls',
-      branch = 'snapshot_1.38.0',
+      'eclipse-jdtls/eclipse.jdt.ls',
       build = './mvnw clean verify -DskipTests=true',
     },
     {
