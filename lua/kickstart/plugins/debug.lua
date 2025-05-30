@@ -15,20 +15,8 @@ return {
     {
       'rcarriga/nvim-dap-ui',
       build = function()
-        local patch_lua = os.getenv 'HOME' .. '/.local/share/nvim/lazy/nvim-dap-ui/lua/dapui/client/lib.lua'
-        local file = io.open(patch_lua, 'r')
-        if file then
-          local content = file:read '*a'
-          file:close()
-          -- Replace the target string
-          content = content:gsub(' or not vim%.uv%.fs_stat%(source%.path%) ', ' ')
-
-          file = io.open(patch_lua, 'w')
-          if file then
-            file:write(content)
-            file:close()
-          end
-        end
+        local patch_lua = vim.fn.stdpath 'config' .. 'patches/patch_stack_frames.patch'
+        os.execute('git apply ' .. patch_lua)
       end,
     },
 
@@ -201,7 +189,7 @@ return {
     }
 
     -- 💀 Make sure to update this path to point to your installation
-    local debugger_path = os.getenv 'HOME' .. '/.local/share/nvim/lazy/vscode-js-debug' -- Path to vscode-js-debug installation.
+    local debugger_path = vim.fn.stdpath 'data' .. '/lazy/vscode-js-debug' -- Path to vscode-js-debug installation.
 
     local vscode_launch_config_name = 'Launch VSCode Extension'
     -- NOTE: This requires the nvim to be opened inside the checkout folder

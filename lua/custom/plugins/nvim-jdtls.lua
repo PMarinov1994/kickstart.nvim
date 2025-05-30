@@ -158,10 +158,12 @@ return {
   dependencies = {
     {
       'microsoft/java-debug',
+      branch = '0.53.1',
       build = './mvnw clean install',
     },
     {
       'eclipse-jdtls/eclipse.jdt.ls',
+      branch = 'v1.47.0',
       build = './mvnw clean verify -DskipTests=true',
     },
     {
@@ -176,7 +178,7 @@ return {
     local extendedClientCapabilities = jdtls.extendedClientCapabilities
     extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
 
-    local lazy_dir = vim.fn.expand '~/.local/share/nvim/lazy'
+    local lazy_dir = vim.fn.stdpath 'data' .. '/lazy'
     local bundles = {
       vim.fn.glob(lazy_dir .. '/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar', true),
     }
@@ -200,7 +202,7 @@ return {
 
     local config = {
       name = curr_dir,
-      on_attach = function(client, bufnr)
+      on_attach = function(_, _)
         ---@diagnostic disable-next-line: missing-fields
         jdtls.setup_dap {
           -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
@@ -275,7 +277,7 @@ return {
           format = {
             enabled = true,
             settings = {
-              url = vim.fn.expand '~/.config/nvim/java_formatter/code_style_formatter.xml',
+              url = vim.fn.stdpath 'config' .. '/java_formatter/code_style_formatter.xml',
               -- profile = 'HilscherStyle',
             },
           },
@@ -310,7 +312,7 @@ return {
     })
   end,
 
-  keys = function(_, keys)
+  keys = function(_, _)
     local util = require 'jdtls.util'
     return {
       {
