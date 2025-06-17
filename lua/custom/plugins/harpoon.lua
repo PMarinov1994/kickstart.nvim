@@ -22,11 +22,6 @@ return {
       vim.notify('Harpoon remove ' .. vim.api.nvim_buf_get_name(buf), vim.log.levels.INFO)
     end, { desc = 'Remove buffer to harpoon' })
 
-    vim.keymap.set('n', '<leader>r', function()
-      harpoon:list():clear()
-      vim.notify('Harpoon clear all', vim.log.levels.INFO)
-    end, { desc = 'Remove buffer to harpoon' })
-
     -- Toggle previous & next buffers stored within Harpoon list
     vim.keymap.set('n', '<M-i>', function()
       harpoon:list():prev()
