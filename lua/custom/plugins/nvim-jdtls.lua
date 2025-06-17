@@ -156,14 +156,15 @@ end
 return {
   'mfussenegger/nvim-jdtls',
   dependencies = {
+    'nvim-dap',
     {
       'PMarinov1994/java-debug',
       branch = 'snapshot_0.53.0-1',
       build = './mvnw clean install',
     },
     {
-      'PMarinov1994/eclipse.jdt.ls',
-      branch = 'snapshot_1.38.0',
+      'eclipse-jdtls/eclipse.jdt.ls',
+      branch = 'main',
       build = './mvnw clean verify -DskipTests=true',
     },
     {
@@ -203,13 +204,12 @@ return {
     local config = {
       name = curr_dir,
       on_attach = function(_, _)
-        ---@diagnostic disable-next-line: missing-fields
         jdtls.setup_dap {
           -- With `hotcodereplace = 'auto' the debug adapter will try to apply code changes
           -- you make during a debug session immediately.
           -- Remove the option if you do not want that.
           hotcodereplace = 'auto',
-          -- config_overrides = {},
+          config_overrides = {},
         }
       end,
       cmd = {
@@ -252,13 +252,18 @@ return {
       -- 💀
       -- This is the default if not provided, you can remove it. Or adjust as needed.
       -- One dedicated LSP server & client will be started per unique root_dir
-      root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew' }),
+      root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew', 'javaConfig.json' }),
 
       -- Here you can configure eclipse.jdt.ls specific settings
       -- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
       -- for a list of options
       settings = {
         java = {
+          inlay_hint = {
+            parameterNames = {
+              enabled = 'all',
+            },
+          },
           eclipse = {
             downloadSources = true,
           },
@@ -295,14 +300,15 @@ return {
         bundles = bundles,
       },
       extendedClientCapabilities = extendedClientCapabilities,
+      capabilities = nil,
     }
 
     -- Start the server if the root folder contains javaConfig.json
     -- This will speed up the loading of the target platform. Otherwise
     -- we start the server when a Java file is opened.
-    if existsInCWD 'javaConfig.json' then
-      jdtls.start_or_attach(config)
-    end
+    -- if existsInCWD 'javaConfig.json' then
+    --   jdtls.start_or_attach(config)
+    -- end
 
     vim.api.nvim_create_autocmd('FileType', {
       pattern = 'java',
