@@ -5,6 +5,11 @@
 local telescope_ext = require 'config.telescope-ext'
 local floterminal = require 'config.floterminal'
 
+local pickers = require 'telescope.pickers'
+local finders = require 'telescope.finders'
+local actions = require 'telescope.actions'
+local action_state = require 'telescope.actions.state'
+
 -- Disable line detele at cursor
 vim.keymap.set('i', '<C-U>', '<nop>', {})
 vim.keymap.set('v', '<leader>p', '"_dP', { noremap = true })
@@ -15,10 +20,6 @@ vim.keymap.set('n', '<leader>ff', telescope_ext.live_multigrep, { desc = 'Grep f
 vim.keymap.set('n', '<leader>fa', function()
   local windows = vim.api.nvim_tabpage_list_wins(0)
 
-  ---@diagnostic disable-next-line: deprecated
-  local lspClients = vim.lsp.get_active_clients()
-  local lastClient = lspClients[#lspClients]
-
   local winId = nil
   if #windows < 2 then
     winId = windows[1]
@@ -31,18 +32,47 @@ vim.keymap.set('n', '<leader>fa', function()
   end
 
   local bufNr = vim.api.nvim_win_get_buf(winId)
-  vim.lsp.buf_attach_client(bufNr, lastClient.id)
 
-  vim.notify('Attached buf: ' .. vim.api.nvim_buf_get_name(bufNr), vim.log.levels.INFO)
+  local function detach_lsp_client_from_buf(targetClient)
+    vim.lsp.buf_attach_client(bufNr, targetClient.id)
+    vim.notify('Attached buf: ' .. vim.api.nvim_buf_get_name(bufNr), vim.log.levels.INFO)
+  end
+
+  ---@diagnostic disable-next-line: deprecated
+  local lspClients = vim.lsp.get_active_clients()
+  if #lspClients < 2 then
+    detach_lsp_client_from_buf(lspClients[1])
+  else
+    pickers
+      .new({}, {
+        prompt_title = 'Select LPS Client',
+        finder = finders.new_table {
+          results = lspClients,
+          entry_maker = function(entry)
+            return {
+              value = entry,
+              display = entry.name,
+              ordinal = entry.name,
+            }
+          end,
+        },
+        attach_mappings = function(buffer_number)
+          actions.select_default:replace(function()
+            actions.close(buffer_number)
+            local targetClient = action_state.get_selected_entry()
+            detach_lsp_client_from_buf(targetClient.value)
+          end)
+          return true
+        end,
+      })
+      :find()
+    return
+  end
 end, { desc = 'Attach current buffer to current lsp' })
 
 vim.keymap.set('n', '<leader>fd', function()
   local windows = vim.api.nvim_tabpage_list_wins(0)
 
-  ---@diagnostic disable-next-line: deprecated
-  local lspClients = vim.lsp.get_active_clients()
-  local lastClient = lspClients[#lspClients]
-
   local winId = nil
   if #windows < 2 then
     winId = windows[1]
@@ -55,9 +85,46 @@ vim.keymap.set('n', '<leader>fd', function()
   end
 
   local bufNr = vim.api.nvim_win_get_buf(winId)
-  vim.lsp.buf_detach_client(bufNr, lastClient.id)
 
-  vim.notify('Detached buf: ' .. vim.api.nvim_buf_get_name(bufNr), vim.log.levels.INFO)
+  local function detach_lsp_client_from_buf(targetClient)
+    vim.lsp.buf_detach_client(bufNr, targetClient.id)
+    vim.notify('Detached buf: ' .. vim.api.nvim_buf_get_name(bufNr), vim.log.levels.INFO)
+  end
+
+  ---@diagnostic disable-next-line: deprecated
+  local lspClients = vim.lsp.get_active_clients {
+    bufnr = bufNr,
+  }
+
+  if #lspClients < 2 then
+    detach_lsp_client_from_buf(lspClients[1])
+  else
+    -- NOTE:May never get here since buffer can have one lsp attached but meh...
+    pickers
+      .new({}, {
+        prompt_title = 'Select LPS Client',
+        finder = finders.new_table {
+          results = lspClients,
+          entry_maker = function(entry)
+            return {
+              value = entry,
+              display = entry.name,
+              ordinal = entry.name,
+            }
+          end,
+        },
+        attach_mappings = function(buffer_number)
+          actions.select_default:replace(function()
+            actions.close(buffer_number)
+            local targetClient = action_state.get_selected_entry()
+            detach_lsp_client_from_buf(targetClient)
+          end)
+          return true
+        end,
+      })
+      :find()
+    return
+  end
 end, { desc = 'Detach current buffer to current lsp' })
 
 vim.keymap.set('n', '<M-j>', '<cmd>cnext<CR>', { desc = 'Go to next Quick Fix line' })
