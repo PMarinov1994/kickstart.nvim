@@ -306,9 +306,9 @@ return {
     -- Start the server if the root folder contains javaConfig.json
     -- This will speed up the loading of the target platform. Otherwise
     -- we start the server when a Java file is opened.
-    -- if existsInCWD 'javaConfig.json' then
-    --   jdtls.start_or_attach(config)
-    -- end
+    if existsInCWD 'javaConfig.json' then
+      jdtls.start_or_attach(config)
+    end
 
     vim.api.nvim_create_autocmd('FileType', {
       pattern = 'java',
