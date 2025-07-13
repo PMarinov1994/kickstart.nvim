@@ -13,6 +13,7 @@ local action_state = require 'telescope.actions.state'
 -- Disable line detele at cursor
 vim.keymap.set('i', '<C-U>', '<nop>', {})
 vim.keymap.set('v', '<leader>p', '"_dP', { noremap = true })
+vim.keymap.set('c', '<C-v>', '<C-r>+', { noremap = true })
 vim.keymap.set('n', '<leader>fy', '<cmd>let @+ = @%<cr>', { noremap = true, desc = "Yank current buff's relative path" })
 vim.keymap.set('n', '<leader>fx', '<cmd>%!xxd<cr>', { noremap = true, desc = 'View current buff as hex' })
 vim.keymap.set('n', '<leader>ff', telescope_ext.live_multigrep, { desc = 'Grep from selected files' })

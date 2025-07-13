@@ -407,11 +407,18 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
+        defaults = {
+          mappings = {
+            i = {
+              -- ['<C-enter>'] = 'to_fuzzy_refine',
+              ['<C-v>'] = function()
+                local key = vim.api.nvim_replace_termcodes('<C-r>', true, false, true)
+                vim.api.nvim_feedkeys(key, 'n', false)
+                vim.api.nvim_feedkeys('+', 'n', false)
+              end,
+            },
+          },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
