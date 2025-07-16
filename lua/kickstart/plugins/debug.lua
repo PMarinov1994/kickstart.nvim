@@ -45,6 +45,14 @@ return {
       desc = 'Debug: Start/Continue',
     },
     {
+      '<F6>',
+      function()
+        require('dap').disconnect { terminateDebuggee = true }
+        require('dapui').close()
+      end,
+      desc = 'Debug: Terminate',
+    },
+    {
       '<F1>',
       function()
         require('dap').step_into()
