@@ -699,6 +699,23 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         ts_ls = {},
         --
+        -- The preferred way to install csharp-ls is with `dotnet tool install --global csharp-ls`.
+        csharp_ls = {
+          cmd = {
+            'csharp-ls',
+          },
+          root_dir = function(bufnr, on_dir)
+            local fname = vim.api.nvim_buf_get_name(bufnr)
+            local util = require 'lspconfig.util'
+            on_dir(util.root_pattern '*.sln'(fname) or util.root_pattern '*.slnx'(fname) or util.root_pattern '*.csproj'(fname))
+          end,
+          filetypes = {
+            'cs',
+          },
+          init_options = {
+            AutomaticWorkspaceInit = true,
+          },
+        },
 
         lua_ls = {
           -- cmd = { ... },
