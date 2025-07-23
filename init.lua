@@ -698,6 +698,9 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         ts_ls = {},
+        buf = {
+          filetypes = { 'proto' },
+        },
         --
         -- The preferred way to install csharp-ls is with `dotnet tool install --global csharp-ls`.
         csharp_ls = {
