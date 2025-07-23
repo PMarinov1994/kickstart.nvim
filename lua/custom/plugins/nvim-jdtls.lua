@@ -158,8 +158,7 @@ return {
   dependencies = {
     'nvim-dap',
     {
-      'PMarinov1994/java-debug',
-      branch = 'snapshot_0.53.0-1',
+      'microsoft/java-debug',
       build = './mvnw clean install',
     },
     {
