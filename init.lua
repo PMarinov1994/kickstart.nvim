@@ -701,6 +701,8 @@ require('lazy').setup({
         buf = {
           filetypes = { 'proto' },
         },
+        html = {},
+        cssls = {},
         --
         -- The preferred way to install csharp-ls is with `dotnet tool install --global csharp-ls`.
         csharp_ls = {
