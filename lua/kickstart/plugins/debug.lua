@@ -26,6 +26,10 @@ return {
 
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
+    {
+      'tomblind/local-lua-debugger-vscode',
+      build = 'npm install && npm run build',
+    },
     'theHamsta/nvim-dap-virtual-text',
     'mfussenegger/nvim-dap-python',
 
@@ -301,6 +305,41 @@ return {
         program = function()
           return vim.fn.input('Path to dll: ', vim.fn.getcwd(), 'file')
         end,
+      },
+    }
+
+    local lazy_dir = vim.fn.stdpath 'data' .. '/lazy'
+
+    dap.adapters['local-lua'] = {
+      type = 'executable',
+      command = 'node',
+      args = {
+        lazy_dir .. '/local-lua-debugger-vscode/extension/debugAdapter.js',
+      },
+      enrich_config = function(config, on_config)
+        if not config['extensionPath'] then
+          local c = vim.deepcopy(config)
+          -- 💀 If this is missing or wrong you'll see
+          -- "module 'lldebugger' not found" errors in the dap-repl when trying to launch a debug session
+          c.extensionPath = lazy_dir .. '/local-lua-debugger-vscode/'
+          on_config(c)
+        else
+          on_config(config)
+        end
+      end,
+    }
+
+    dap.configurations.lua = {
+      {
+        name = 'Current file (local-lua-dbg, lua)',
+        type = 'local-lua',
+        request = 'launch',
+        cwd = '${workspaceFolder}',
+        program = {
+          lua = 'lua5.4',
+          file = '${file}',
+        },
+        args = {},
       },
     }
   end,
