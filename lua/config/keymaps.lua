@@ -9,6 +9,7 @@ local pickers = require 'telescope.pickers'
 local finders = require 'telescope.finders'
 local actions = require 'telescope.actions'
 local action_state = require 'telescope.actions.state'
+local telescope = require 'telescope'
 
 -- Disable line detele at cursor
 vim.keymap.set('i', '<C-U>', '<nop>', {})
@@ -17,6 +18,9 @@ vim.keymap.set('c', '<C-v>', '<C-r>+', { noremap = true })
 vim.keymap.set('n', '<leader>fy', '<cmd>let @+ = @%<cr>', { noremap = true, desc = "Yank current buff's relative path" })
 vim.keymap.set('n', '<leader>fx', '<cmd>%!xxd<cr>', { noremap = true, desc = 'View current buff as hex' })
 vim.keymap.set('n', '<leader>ff', telescope_ext.live_multigrep, { desc = 'Grep from selected files' })
+vim.keymap.set('n', '<leader>fb', function()
+  telescope.extensions.file_browser.file_browser { path = '~/' }
+end, { desc = 'Fuzzy find files' })
 
 vim.keymap.set('n', '<leader>fa', function()
   local windows = vim.api.nvim_tabpage_list_wins(0)
