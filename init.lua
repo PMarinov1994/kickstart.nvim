@@ -650,6 +650,7 @@ require('lazy').setup({
           cmd = {
             'clangd',
             '--query-driver=gcc',
+            '-header-insertion=never',
           },
         },
         gopls = {},
