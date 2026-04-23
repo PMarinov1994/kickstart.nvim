@@ -158,8 +158,10 @@ return {
   dependencies = {
     'nvim-dap',
     {
-      'microsoft/java-debug',
+      -- 'microsoft/java-debug',
+      'pmarinov1994/java-debug',
       build = './mvnw clean install',
+      branch = 'snapshot_0.53.0-1',
     },
     {
       'eclipse-jdtls/eclipse.jdt.ls',

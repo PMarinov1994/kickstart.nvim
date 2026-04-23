@@ -14,7 +14,7 @@ return {
     -- Creates a beautiful debugger UI
     {
       'rcarriga/nvim-dap-ui',
-      build = 'git apply ' .. vim.fn.stdpath 'config' .. '/patches/patch_stack_frames.patch',
+      -- build = 'git apply ' .. vim.fn.stdpath 'config' .. '/patches/patch_stack_frames.patch',
     },
 
     -- Required dependency for nvim-dap-ui
