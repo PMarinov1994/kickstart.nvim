@@ -11,6 +11,9 @@ return {
         adaptive_size = true,
         -- width = 10,
       },
+      renderer = {
+        root_folder_label = ':t', -- show only the tail (folder name) of the path
+      },
     }
   end,
   keys = function()
