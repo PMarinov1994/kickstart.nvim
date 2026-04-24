@@ -1,0 +1,25 @@
+diff --git a/gulpfile.js b/gulpfile.js
+index fdbc4e5..50d0522 100644
+--- a/gulpfile.js
++++ b/gulpfile.js
+@@ -335,7 +335,7 @@ gulp.task('dapDebugServer:webpack-bundle', async () => {
+ 
+ /** Run webpack to bundle into the VS debug server */
+ gulp.task('vsDebugServerBundle:webpack-bundle', async () => {
+-  const packages = [{ entry: `${srcDir}/vsDebugServer.ts`, library: true }];
++  const packages = [{ entry: `${srcDir}/vsDebugServer.ts`, library: true, isInVsCode: true }];
+   return compileTs({ packages, sourcemap: isDebug, minify: !isDebug });
+ });
+ 
+diff --git a/package.json b/package.json
+index f1ff3ab..c2f3f64 100644
+--- a/package.json
++++ b/package.json
+@@ -38,7 +38,6 @@
+     "prepare": "husky install",
+     "package": "gulp package",
+     "publish": "gulp publish",
+-    "postinstall": "playwright install chromium --with-deps --only-shell",
+     "precommit": "npm-run-all --parallel test:lint test:types",
+     "updatetypes": "cd src/typings && npx -y @vscode/dts dev && npx -y @vscode/dts master",
+     "updatenodeapi": "python src/build/getNodePdl.py && dprint fmt",

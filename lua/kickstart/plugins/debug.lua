@@ -38,7 +38,9 @@ return {
     -- My debuggers
     {
       'microsoft/vscode-js-debug',
-      build = 'npm ci && npx gulp dapDebugServer && mv dist out',
+      build = 'git apply ' .. vim.fn.stdpath 'config' .. '/patches/vscode-js-debug.patch && ' ..
+        'cp ' .. vim.fn.stdpath 'config' .. '/patches/playwright.config.ts ./ && ' ..
+        'npm install --legacy-peer-deps && npx gulp vsDebugServerBundle && mv dist out',
     },
   },
   keys = {
