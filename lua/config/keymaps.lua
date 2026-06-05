@@ -143,3 +143,5 @@ vim.keymap.set('n', '<Down>', ':resize -2<CR>')
 vim.keymap.set('n', '<leader>ft', floterminal.toggle_floterminal, { desc = 'Toggle floterminal' })
 
 vim.keymap.set('n', 'q', '<nop>', {})
+
+vim.opt.colorcolumn = "105"
