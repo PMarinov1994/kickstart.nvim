@@ -1,0 +1,23 @@
+return {
+  'linux-cultist/venv-selector.nvim',
+  dependencies = {
+    { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim' } }, -- optional: you can also use fzf-lua, snacks, mini-pick instead.
+  },
+  ft = 'python', -- Load when opening Python files
+  keys = {}, -- Open picker on keymap
+  opts = {
+    options = {}, -- plugin-wide options
+    search = {
+      current_folder = {
+        command = "fd '/bin/python$' . --full-path --absolute-path --color never",
+      },
+      parent_folder = {
+        command = "fd '/bin/python$' .. --full-path --absolute-path --color never",
+      },
+      -- you can add more searches here
+      -- another_search = {
+      -- command = ""
+      -- }
+    },
+  },
+}
