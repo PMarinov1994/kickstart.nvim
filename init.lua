@@ -808,7 +808,7 @@ do
       -- javascript = { "prettierd", "prettier", stop_after_first = true },
       xml = { 'xmlformat' },
     },
-    formatter = {
+    formatters = {
       xmlformat = {
         command = 'tidy',
         args = {
