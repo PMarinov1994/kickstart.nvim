@@ -1,12 +1,3 @@
-return {
-  'terrortylor/nvim-comment',
-  config = function()
-    require('nvim_comment').setup {}
-  end,
-  keys = function()
-    return {
-      { '<leader>cl', ':CommentToggle<cr>', desc = 'Toggle Comment Block', mode = 'v' },
-      { '<leader>cl', ':CommentToggle<cr>', desc = 'Toggle Comment Block', mode = 'n' },
-    }
-  end,
-}
+vim.pack.add { 'https://github.com/terrortylor/nvim-comment' }
+
+vim.keymap.set({'n', 'v'}, '<leader>cl', vim.cmd.CommentToggle, { desc = 'Toggle Comment Block' })

@@ -1,3 +1,4 @@
+-- TODO: This needs to be reworked from lazy.nvim to vim.pack package manager
 return {
   'linux-cultist/venv-selector.nvim',
   dependencies = {

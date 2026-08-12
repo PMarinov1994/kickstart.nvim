@@ -1,7 +1,5 @@
-return {
-  --lazy
-  {
-    'nvim-telescope/telescope-file-browser.nvim',
-    dependencies = { 'nvim-telescope/telescope.nvim', 'nvim-lua/plenary.nvim' },
-  },
+vim.pack.add {
+  'https://github.com/nvim-telescope/telescope-file-browser.nvim',
+  'https://github.com/nvim-telescope/telescope.nvim',
+  'https://github.com/nvim-lua/plenary.nvim',
 }

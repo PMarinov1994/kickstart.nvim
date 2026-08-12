@@ -1,3 +1,1 @@
-return {
-  'normen/vim-pio',
-}
+vim.pack.add { 'https://github.com/normen/vim-pio' }

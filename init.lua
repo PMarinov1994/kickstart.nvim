@@ -806,6 +806,22 @@ do
       --
       -- You can use 'stop_after_first' to run the first available formatter from the list
       -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      xml = { 'xmlformat' },
+    },
+    formatter = {
+      xmlformat = {
+        command = 'tidy',
+        args = {
+          '-quiet',
+          '-xml',
+          '--indent', 'yes',
+          '--indent-spaces', '2',
+          '--sort-attributes', 'alpha',
+          '--wrap', '0',
+          '--indent-attributes', '1',
+        },
+        stdin = true,
+      },
     },
   }
 

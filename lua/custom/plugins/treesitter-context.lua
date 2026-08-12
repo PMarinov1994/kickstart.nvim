@@ -1,8 +1,5 @@
-return {
-  'nvim-treesitter/nvim-treesitter-context',
-  config = function()
-    require('treesitter-context').setup {
-      max_lines = 2,
-    }
-  end,
+vim.pack.add { 'https://github.com/nvim-treesitter/nvim-treesitter-context' }
+
+require('treesitter-context').setup {
+  max_lines = 2,
 }
