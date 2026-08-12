@@ -315,6 +315,11 @@ do
         vim.cmd 'TSUpdate'
         return
       end
+
+      if name == 'markdown-preview.nvim' then
+        run_build(name, { 'npm', 'install' }, ev.data.path)
+        return
+      end
     end,
   })
 end
@@ -814,11 +819,16 @@ do
         args = {
           '-quiet',
           '-xml',
-          '--indent', 'yes',
-          '--indent-spaces', '2',
-          '--sort-attributes', 'alpha',
-          '--wrap', '0',
-          '--indent-attributes', '1',
+          '--indent',
+          'yes',
+          '--indent-spaces',
+          '2',
+          '--sort-attributes',
+          'alpha',
+          '--wrap',
+          '0',
+          '--indent-attributes',
+          '1',
         },
         stdin = true,
       },
