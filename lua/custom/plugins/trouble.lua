@@ -1,5 +1,10 @@
 vim.pack.add { 'https://github.com/folke/trouble.nvim' }
 
+require('trouble').setup {
+  auto_preview = false,
+  follow = false,
+}
+
 local map = vim.keymap.set
 
 map('n', '<leader>xa', '<cmd>Trouble diagnostics toggle<cr>', { desc = 'Diagnostics (Trouble)' })
